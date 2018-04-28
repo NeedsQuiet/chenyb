@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.manager.dao.cost.UserPackageInstanceInterfaceDao">
+    
+	<sql id="userPackageInstanceInterfaceColumns">
+		a.id AS "id",
+		a.package_instance_id AS "userPackageInstance.id",
+		a.interface_id AS "interfaceId",
+		a.interface_name AS "interfaceName",
+		a.conf_time AS "confTime",
+		a.conf_person AS "confPerson",
+		a.available_times AS "availableTimes"
+	</sql>
+	
+	<sql id="userPackageInstanceInterfaceJoins">
+		LEFT JOIN id_user_package_instance b ON b.id = a.package_instance_id
+	</sql>
+	
+    
+	<select id="get" resultType="UserPackageInstanceInterface" >
+		SELECT 
+			<include refid="userPackageInstanceInterfaceColumns"/>
+		FROM id_user_package_instance_interface a
+		<include refid="userPackageInstanceInterfaceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="UserPackageInstanceInterface" >
+		SELECT 
+			<include refid="userPackageInstanceInterfaceColumns"/>
+		FROM id_user_package_instance_interface a
+		<include refid="userPackageInstanceInterfaceJoins"/>
+		<where>
+			
+			<if test="userPackageInstance != null and userPackageInstance.id != null and userPackageInstance.id != ''">
+				AND a.package_instance_id = #{userPackageInstance.id}
+			</if>
+			<if test="interfaceName != null and interfaceName != ''">
+				AND a.interface_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{interfaceName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{interfaceName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{interfaceName},'%')</if>
+			</if>
+			<if test="beginConfTime != null and endConfTime != null and beginConfTime != '' and endConfTime != ''">
+				AND a.conf_time BETWEEN #{beginConfTime} AND #{endConfTime}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="UserPackageInstanceInterface" >
+		SELECT 
+			<include refid="userPackageInstanceInterfaceColumns"/>
+		FROM id_user_package_instance_interface a
+		<include refid="userPackageInstanceInterfaceJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO id_user_package_instance_interface(
+			id,
+			package_instance_id,
+			interface_id,
+			interface_name,
+			conf_time,
+			conf_person,
+			available_times
+		) VALUES (
+			#{id},
+			#{userPackageInstance.id},
+			#{interfaceId},
+			#{interfaceName},
+			#{confTime},
+			#{confPerson},
+			#{availableTimes}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE id_user_package_instance_interface SET 	
+			package_instance_id = #{userPackageInstance.id},
+			interface_id = #{interfaceId},
+			interface_name = #{interfaceName},
+			conf_time = #{confTime},
+			conf_person = #{confPerson},
+			available_times = #{availableTimes}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM id_user_package_instance_interface
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE package_instance_id = #{userPackageInstance.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE id_user_package_instance_interface SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE package_instance_id = #{userPackageInstance.id}
+			</otherwise>
+		</choose>
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="UserPackageInstanceInterface" statementType="STATEMENT">
+		select * FROM id_user_package_instance_interface  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>
